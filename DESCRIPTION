@@ -2,10 +2,24 @@ Package: linkinspectR
 Title: Review Peak-to-Gene Links in Single-Cell Multiomics Datasets
 Version: 0.0.0.9000
 Authors@R: 
-    person("Sarah", "Inglesfield", "sarah.inglesfield@babraham.ac.uk", role = c("aut", "cre"))
+    person(given="Sarah", family ="Inglesfield", 
+    email ="sarah.inglesfield@babraham.ac.uk", 
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-3511-9090"))
 Description: Provides tools to review peak-to-gene links identified using Signac::LinkPeaks. This package extracts gene expression and peak accessibility data associated with specified links, and facilitates comparison between cells with and without reads in linked peaks. For these two populations, it compares either normalised gene expression and total UMI counts, or the proportion of cells which express the linked genes. Functions return tibbles by default, with optional plot outputs for visual assessment.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Imports: 
+    assertthat,
+    dplyr,
+    ggplot2,
+    magrittr,
+    patchwork,
+    purrr,
+    SeuratObject (>= 5.0.0),
+    Signac,
+    stringr,
+    tibble,
+    tidyr
