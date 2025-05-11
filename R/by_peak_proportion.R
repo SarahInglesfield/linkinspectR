@@ -5,52 +5,56 @@
 #' @param plot Logical; if \code{TRUE}, returns a ggplot object visualising expression and UMI distributions. Default is \code{FALSE}
 #'
 #' @returns A tibble with one row per cell-peak-gene combination and the following columns:
-#' \itemize{
-#'    \item \code{gene}: the selected linked gene
-#'    \item \code{peak}: the selected linked peak
-#'    \item \code{score}: the correlation coefficient - from LinkPeaks
-#'    \item \code{zscore}: the z-score of the correlation coefficient - from LinkPeaks
-#'    \item \code{pvalue}: the p-value associated with the z-score - from LinkPeaks
-#'    \item \code{cell_barcode}: the unique identifier for each cell - from Seurat Object
-#'    \item \code{gene_data}: the normalised RNAseq expression data - from Seurat Object
-#'    \item \code{gene_counts}: the raw RNAseq count data - from Seurat Object
-#'    \item \code{peak_data}: the normalised ATAC expression data - from Seurat Object
-#'    \item \code{peak_counts}: the raw ATAC count data - from Seurat Object
-#'    \item \code{read_in_peak}: Logical; \code{TRUE} if a read is observed in the peak for a given cell
-#'    \item \code{cells_gene_expressed}: number of cells expressing the linked gene (non-zero raw count)
-#'    \item \code{cells_total}: total number of cells in the population
-#'    \item \code{pct_cells_gene_expressed}: percentage of cells which express the linked gene
-#'    \item \code{lower_conf_int}: lower bound of 95% confidence interval
-#'    \item \code{upper_conf_int}: upper bound of 95% confidence interval
+#' \describe{
+#'    \item{gene}{: the selected linked gene}
+#'    \item{peak}{: the selected linked peak}
+#'    \item{score}{: the correlation coefficient - from LinkPeaks}
+#'    \item{zscore}{: the z-score of the correlation coefficient - from LinkPeaks}
+#'    \item{pvalue}{: the p-value associated with the z-score - from LinkPeaks}
+#'    \item{cell_barcode}{: the unique identifier for each cell - from Seurat Object}
+#'    \item{gene_data}{: the normalised RNAseq expression data - from Seurat Object}
+#'    \item{gene_counts}{: the raw RNAseq count data - from Seurat Object}
+#'    \item{peak_data}{: the normalised ATAC expression data - from Seurat Object}
+#'    \item{peak_counts}{: the raw ATAC count data - from Seurat Object}
+#'    \item{read_in_peak}{: Logical; \code{TRUE} if a read is observed in the peak for a given cell}
+#'    \item{cells_gene_expressed}{: number of cells expressing the linked gene (non-zero raw count)}
+#'    \item{cells_total}{: total number of cells in the population}
+#'    \item{pct_cells_gene_expressed}{: percentage of cells which express the linked gene}
+#'    \item{lower_conf_int}{: lower bound of 95% confidence interval}
+#'    \item{upper_conf_int}{: upper bound of 95% confidence interval}
+#'    }
 #' @export
 #'
 #' @examples
+#' data <- by_peak_proportion(links_data)
+#' by_peak_proportion(links_data,plot = TRUE)
+#'
 by_peak_proportion <- function(links_data, plot = FALSE){
 
 
   #Calculate the percentage which express the gene for cells grouped by whether they do or don't have a read in the peak
 
   links_data %>%
-    dplyr::mutate(link = str_c(gene, peak, sep = " : ")) %>%
+    dplyr::mutate(link = stringr::str_c(gene, peak, sep = " : ")) %>%
     dplyr::group_by(link, read_in_peak, .add = TRUE) %>%
     dplyr::mutate(gene_expressed = gene_counts>0) %>%
     dplyr::reframe(
       cells_gene_expressed = sum(gene_expressed),
-      cells_total = n(),
-      pct_cells_gene_expressed = 100*sum(gene_expressed)/ n()
+      cells_total = dplyr::n(),
+      pct_cells_gene_expressed = 100*sum(gene_expressed)/ dplyr::n()
     ) -> link_ratios
 
   #Also calculate a measure of confidence in this data, use a binomial proportion to get the confidence intervals
   link_ratios %>%
     dplyr::group_by(link, read_in_peak, .add = TRUE) %>%
     dplyr::mutate(
-      lower_conf_int = prop.test(cells_gene_expressed, cells_total, conf.level=0.95, correct=FALSE)$conf.int[1]*100,
-      upper_conf_int = prop.test(cells_gene_expressed, cells_total, conf.level=0.95, correct=FALSE)$conf.int[2]*100
+      lower_conf_int = stats::prop.test(cells_gene_expressed, cells_total, conf.level=0.95, correct=FALSE)$conf.int[1]*100,
+      upper_conf_int = stats::prop.test(cells_gene_expressed, cells_total, conf.level=0.95, correct=FALSE)$conf.int[2]*100
     ) %>%
     dplyr::ungroup() -> link_ratios
 
   links_data %>%
-    dplyr::mutate(link = str_c(gene, peak, sep = " : ")) %>%
+    dplyr::mutate(link = stringr::str_c(gene, peak, sep = " : ")) %>%
     dplyr::right_join(link_ratios, by = c("link", "read_in_peak")) %>%
     dplyr::distinct(link,read_in_peak,.keep_all = TRUE) -> link_ratios
 
@@ -63,31 +67,31 @@ by_peak_proportion <- function(links_data, plot = FALSE){
   else{
     # add a label name for plots
     link_ratios %>%
-      dplyr::mutate(label_name = str_c(gene, peak, sep = " : ")) %>%
-      dplyr::mutate(label_name = str_c(label_name, round(score, 3), sep = "\n")) %>%
-      ggplot2::ggplot(aes(x=read_in_peak, y=pct_cells_gene_expressed,
+      dplyr::mutate(label_name = stringr::str_c(gene, peak, sep = " : ")) %>%
+      dplyr::mutate(label_name = stringr::str_c(label_name, round(score, 3), sep = "\n")) %>%
+      ggplot2::ggplot(ggplot2::aes(x=read_in_peak, y=pct_cells_gene_expressed,
                           ymin=lower_conf_int, ymax=upper_conf_int,
                           fill = read_in_peak)) +
       ggplot2::geom_col() +
       ggplot2::geom_errorbar(width=0.4) +
-      ggplot2::theme(panel.grid = element_blank()) +
-      ggplot2::scale_y_continuous(expand = expansion(add=c(0,10))) +
+      ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+      ggplot2::scale_y_continuous(expand = ggplot2::expansion(add=c(0,10))) +
 
       ggplot2::facet_wrap(~label_name,
                           ncol = 2,
                           scales="free"
       ) +
 
-      xlab(NULL) +
+      ggplot2::xlab(NULL) +
       ggplot2::ylab("% cells expressing gene") +
       ggplot2::theme(
-        plot.title = element_text(hjust = 0.5, size = 14),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 14),
         legend.position = "top",
-        legend.text = element_text(size = 10),
-        strip.text = element_text(size = 10),
-        strip.background = element_rect("white"),
-        axis.text.x =element_blank(),
-        axis.ticks.x =element_blank()
+        legend.text = ggplot2::element_text(size = 10),
+        strip.text = ggplot2::element_text(size = 10),
+        strip.background = ggplot2::element_rect("white"),
+        axis.text.x = ggplot2::element_blank(),
+        axis.ticks.x = ggplot2::element_blank()
       )
   }
 
