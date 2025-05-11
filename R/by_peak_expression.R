@@ -6,29 +6,24 @@
 #' @param plot Logical; if \code{TRUE}, returns a ggplot object visualising expression and UMI distributions. Default is \code{FALSE}
 #'
 #' @returns A tibble with one row per cell-peak-gene combination and the following columns:
-#' \describe{
-#'    \item{gene}{: the selected linked gene}
-#'    \item{peak}{: the selected linked peak}
-#'    \item{score}{: the correlation coefficient - from LinkPeaks}
-#'    \item{zscore}{: the z-score of the correlation coefficient - from LinkPeaks}
-#'    \item{pvalue}{: the p-value associated with the z-score - from LinkPeaks}
-#'    \item{cell_barcode}{: the unique identifier for each cell - from Seurat Object}
-#'    \item{gene_data}{: the normalised RNAseq expression data - from Seurat Object}
-#'    \item{gene_counts}{: the raw RNAseq count data - from Seurat Object}
-#'    \item{peak_data}{: the normalised ATAC expression data - from Seurat Object}
-#'    \item{peak_counts}{: the raw ATAC count data - from Seurat Object}
-#'    \item{read_in_peak}{: Logical; \code{TRUE} if a read is observed in the peak for a given cell}
-#'    \item{nCount_RNA}{: Total RNA UMI counts per cell - from Seurat Object}
-#'    }
-#'
+#' \itemize{
+#'    \item \code{gene}: the selected linked gene
+#'    \item \code{peak}: the selected linked peak
+#'    \item \code{score}: the correlation coefficient - from LinkPeaks
+#'    \item \code{zscore}: the z-score of the correlation coefficient - from LinkPeaks
+#'    \item \code{pvalue}: the p-value associated with the z-score - from LinkPeaks
+#'    \item \code{cell_barcode}: the unique identifier for each cell - from Seurat Object
+#'    \item \code{gene_data}: the normalised RNAseq expression data - from Seurat Object
+#'    \item \code{gene_counts}: the raw RNAseq count data - from Seurat Object
+#'    \item \code{peak_data}: the normalised ATAC expression data - from Seurat Object
+#'    \item \code{peak_counts}: the raw ATAC count data - from Seurat Object
+#'    \item \code{read_in_peak}: Logical; \code{TRUE} if a read is observed in the peak for a given cell
+#'    \item \code{nCount_RNA}: Total RNA UMI counts per cell - from Seurat Object
+#'}
 #' @export
 #'
-#' @examples
-#'
-#' data <- by_peak_expression(links_data,seurat_object = seurat_data)
-#' by_peak_expression(links_data,seurat_object = data,plot = TRUE)
-#'
-by_peak_expression <- function(links_data, seurat_object,plot = FALSE){
+
+by_peak_expression <- function(links_data, seurat_object = system.file("model_link_data.rds",pacckage = "linkinspectR"),plot = FALSE){
 
   # Get the total UMI counts from the meta data
   tibble::as_tibble(seurat_object@meta.data,rownames = "cell_barcode") %>%

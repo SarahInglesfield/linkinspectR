@@ -25,10 +25,7 @@
 #'    }
 #' @export
 #'
-#' @examples
-#' data <- by_peak_proportion(links_data)
-#' by_peak_proportion(links_data,plot = TRUE)
-#'
+
 by_peak_proportion <- function(links_data, plot = FALSE){
 
 

@@ -25,12 +25,6 @@
 #'    }
 #' @export
 #'
-#' @examples
-#' get_link_data(seurat_object = data,Gene = c("MS4A1","LYZ"))
-#' get_link_data(seurat_object = data,Peak = c("chr11-60455290-60456088","chr12-69006867-69009191"))
-#' get_link_data(seurat_object = data,Pvalue = 0.01)
-#' links_data <- get_link_data(seurat_object = data, expression.assay = "Genes", chromatin.assay = "Peaks", Gene = "MS4A1",Peak = "chr11-60455290-60456088", Pvalue = 0.01)
-#'
 
 get_link_data <- function(seurat_object, Gene=NULL, Peak=NULL,Pvalue=NULL,
                           expression.assay = "RNA", chromatin.assay = "ATAC"){
